@@ -12,6 +12,7 @@ namespace MauiAppMinhasCompras2026.Models
         public string Descricao { get; set; }
         public double Quantidade { get; set; }
         public double Preco { get; set; }
+        public double Total => Quantidade * Preco; // Propriedade calculada para o total
 
     }
 }

@@ -2,11 +2,112 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MauiAppMinhasCompras2026.Views.ListaProduto"
-             Title="ListaProduto">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+             Title="Minhas Compras">
+
+    <Grid Padding="10" RowSpacing="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Título -->
+        <Label Text="Minhas Compras" 
+               FontSize="24" 
+               FontAttributes="Bold"
+               HorizontalOptions="Center"
+               Grid.Row="0"/>
+
+        <!-- Botões Somar e Adicionar -->
+        <Grid Grid.Row="1" ColumnSpacing="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Text="Somar" 
+                    BackgroundColor="#4CAF50"
+                    TextColor="White"
+                    CornerRadius="8"
+                    HeightRequest="50"
+                    Grid.Column="0"
+                    Clicked="OnSomarClicked"/>
+
+            <Button Text="Adicionar" 
+                    BackgroundColor="#2196F3"
+                    TextColor="White"
+                    CornerRadius="8"
+                    HeightRequest="50"
+                    Grid.Column="1"
+                    Clicked="OnAdicionarClicked"/>
+        </Grid>
+
+        <!-- Busca de produtos -->
+        <Grid Grid.Row="2" ColumnSpacing="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Entry x:Name="txtBusca" 
+                   Placeholder="Buscar produtos..."
+                   Grid.Column="0"
+                   TextChanged="OnBuscaTextChanged"/>
+
+            <Button Text="Buscar" 
+                    BackgroundColor="#FF9800"
+                    TextColor="White"
+                    CornerRadius="8"
+                    WidthRequest="80"
+                    HeightRequest="40"
+                    Grid.Column="1"
+                    Clicked="OnBuscarClicked"/>
+        </Grid>
+
+        <!-- Lista de produtos -->
+        <ListView x:Name="listViewProdutos" 
+                  Grid.Row="3"
+                  Margin="0,10,0,0"
+                  ItemTapped="OnItemTapped">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <Grid Padding="10" ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Label Text="{Binding Descricao}" 
+                                   FontAttributes="Bold"
+                                   Grid.Column="0"/>
+
+                            <Label Text="{Binding Quantidade}" 
+                                   Grid.Column="1"/>
+
+                            <Label Text="{Binding Preco, StringFormat='R$ {0:F2}'}" 
+                                   Grid.Column="2"/>
+
+                            <Label Text="{Binding Total, StringFormat='R$ {0:F2}'}" 
+                                   TextColor="#4CAF50"
+                                   FontAttributes="Bold"
+                                   Grid.Column="3"/>
+                        </Grid>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <!-- Indicador de carregamento -->
+        <ActivityIndicator x:Name="activityIndicator" 
+                           IsRunning="False"
+                           IsVisible="False"
+                           Grid.Row="4"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center"/>
+    </Grid>
 </ContentPage>
