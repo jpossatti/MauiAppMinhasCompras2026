@@ -5,123 +5,73 @@ namespace MauiAppMinhasCompras2026.Views;
 
 public partial class NovoProduto : ContentPage
 {
-    private readonly SQLiteDatabaseHelper _dbHelper;
-
     public NovoProduto()
     {
         InitializeComponent();
-
-        // Inicializa o banco de dados
-        string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "compras.db3");
-        _dbHelper = new SQLiteDatabaseHelper(dbPath);
-
-        // Garante que os campos estão habilitados
-        txtDescricao.IsEnabled = true;
-        txtQuantidade.IsEnabled = true;
-        txtPreco.IsEnabled = true;
     }
 
-    private async void OnSalvarClicked(object sender, EventArgs e)
+    private async void ToolbarItem_Clicked(object sender, EventArgs e)
     {
         try
         {
-            // Valida os campos
-            if (string.IsNullOrWhiteSpace(txtDescricao.Text))
+            // 1. Validação de campos vazios
+            if (string.IsNullOrWhiteSpace(txt_descricao.Text))
             {
-                await DisplayAlert("Erro", "Por favor, informe a descrição do produto.", "OK");
-                txtDescricao.Focus();
+                await DisplayAlert("Atenção", "Por favor, preencha a descrição do produto.", "OK");
+                txt_descricao.Focus();
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(txtQuantidade.Text))
+            if (string.IsNullOrWhiteSpace(txt_quantidade.Text))
             {
-                await DisplayAlert("Erro", "Por favor, informe a quantidade.", "OK");
-                txtQuantidade.Focus();
+                await DisplayAlert("Atenção", "Por favor, preencha a quantidade.", "OK");
+                txt_quantidade.Focus();
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(txtPreco.Text))
+            if (string.IsNullOrWhiteSpace(txt_preco.Text))
             {
-                await DisplayAlert("Erro", "Por favor, informe o preço.", "OK");
-                txtPreco.Focus();
+                await DisplayAlert("Atenção", "Por favor, preencha o preço unitário.", "OK");
+                txt_preco.Focus();
                 return;
             }
 
-            // Converte e valida os valores numéricos
-            if (!double.TryParse(txtQuantidade.Text, out double quantidade))
+            // 2. Tratamento para aceitar tanto ponto quanto vírgula decimal
+            string qteTexto = txt_quantidade.Text.Replace(',', '.');
+            string precoTexto = txt_preco.Text.Replace(',', '.');
+
+            if (!double.TryParse(qteTexto, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double quantidade))
             {
-                await DisplayAlert("Erro", "Por favor, insira um valor numérico válido para quantidade.", "OK");
-                txtQuantidade.Focus();
-                txtQuantidade.Text = string.Empty;
+                await DisplayAlert("Atenção", "Quantidade inválida. Digite apenas números.", "OK");
+                txt_quantidade.Focus();
                 return;
             }
 
-            if (!double.TryParse(txtPreco.Text, out double preco))
+            if (!double.TryParse(precoTexto, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double preco))
             {
-                await DisplayAlert("Erro", "Por favor, insira um valor numérico válido para preço.", "OK");
-                txtPreco.Focus();
-                txtPreco.Text = string.Empty;
+                await DisplayAlert("Atenção", "Preço inválido. Digite apenas números.", "OK");
+                txt_preco.Focus();
                 return;
             }
 
-            // Valida se os valores são positivos
-            if (quantidade <= 0)
+            // 3. Criação do objeto e Inserção no Banco
+            Produto p = new Produto
             {
-                await DisplayAlert("Erro", "A quantidade deve ser maior que zero.", "OK");
-                txtQuantidade.Focus();
-                txtQuantidade.Text = string.Empty;
-                return;
-            }
-
-            if (preco <= 0)
-            {
-                await DisplayAlert("Erro", "O preço deve ser maior que zero.", "OK");
-                txtPreco.Focus();
-                txtPreco.Text = string.Empty;
-                return;
-            }
-
-            // Cria o novo produto
-            var produto = new Produto
-            {
-                Descricao = txtDescricao.Text.Trim(),
+                Descricao = txt_descricao.Text,
                 Quantidade = quantidade,
                 Preco = preco
             };
 
-            // Salva no banco de dados
-            int resultado = await _dbHelper.Insert(produto);
+            await App.Db.Insert(p);
 
-            if (resultado > 0)
-            {
-                // Mensagem de sucesso
-                await DisplayAlert("Sucesso", "Produto cadastrado com sucesso!", "OK");
+            await DisplayAlert("Sucesso", "Produto cadastrado com sucesso!", "OK");
 
-                // Limpa os campos
-                txtDescricao.Text = string.Empty;
-                txtQuantidade.Text = string.Empty;
-                txtPreco.Text = string.Empty;
-
-                // Foca no primeiro campo
-                txtDescricao.Focus();
-            }
-            else
-            {
-                await DisplayAlert("Erro", "Não foi possível salvar o produto. Tente novamente.", "OK");
-            }
+            // 4. Retorna para a tela de listagem
+            await Navigation.PopAsync();
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Erro", $"Ocorreu um erro ao salvar o produto: {ex.Message}", "OK");
+            await DisplayAlert("Erro ao Salvar", ex.Message, "OK");
         }
-    }
-
-    // Método para limpar os campos manualmente (opcional)
-    private void LimparCampos()
-    {
-        txtDescricao.Text = string.Empty;
-        txtQuantidade.Text = string.Empty;
-        txtPreco.Text = string.Empty;
-        txtDescricao.Focus();
     }
 }

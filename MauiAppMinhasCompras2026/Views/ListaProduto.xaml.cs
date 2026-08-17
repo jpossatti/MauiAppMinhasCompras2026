@@ -1,120 +1,146 @@
 using MauiAppMinhasCompras2026.Helpers;
 using MauiAppMinhasCompras2026.Models;
+using System.Collections.ObjectModel;
 
 namespace MauiAppMinhasCompras2026.Views;
 
 public partial class ListaProduto : ContentPage
 {
-    private readonly SQLiteDatabaseHelper _dbHelper;
-    private List<Produto> _produtos;
-    private bool _isLoading;
+    private ObservableCollection<Produto> _produtos = new ObservableCollection<Produto>();
+    private List<Produto> _listaCompleta = new List<Produto>();
 
     public ListaProduto()
     {
         InitializeComponent();
-
-        string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "compras.db3");
-        _dbHelper = new SQLiteDatabaseHelper(dbPath);
-
-        // Carrega a lista quando a página aparecer
-        Appearing += OnPageAppearing;
     }
 
-    private async void OnPageAppearing(object sender, EventArgs e)
+    protected override void OnAppearing()
     {
-        await CarregarProdutos();
+        base.OnAppearing();
+        CarregarProdutos();
     }
 
-    private async Task CarregarProdutos(string busca = "")
+    private async void CarregarProdutos()
     {
         try
         {
-            _isLoading = true;
-            activityIndicator.IsRunning = true;
-            activityIndicator.IsVisible = true;
+            var produtos = await App.Db.GetAll();
+            _listaCompleta = produtos;
 
-            if (string.IsNullOrWhiteSpace(busca))
+            _produtos.Clear();
+            foreach (var produto in _listaCompleta)
             {
-                _produtos = await _dbHelper.GetAll();
-            }
-            else
-            {
-                _produtos = await _dbHelper.Search(busca);
+                _produtos.Add(produto);
             }
 
-            // Calcula o total de cada produto
-            foreach (var produto in _produtos)
-            {
-                // Propriedade Total será calculada na view
-                // Usando uma classe auxiliar ou propriedade calculada
-            }
+            ProdutosCollectionView.ItemsSource = null;
+            ProdutosCollectionView.ItemsSource = _produtos;
 
-            listViewProdutos.ItemsSource = _produtos;
+            CalcularTotalGeral();
         }
         catch (Exception ex)
         {
             await DisplayAlert("Erro", $"Erro ao carregar produtos: {ex.Message}", "OK");
         }
-        finally
-        {
-            _isLoading = false;
-            activityIndicator.IsRunning = false;
-            activityIndicator.IsVisible = false;
-        }
     }
 
-    private async void OnBuscaTextChanged(object sender, TextChangedEventArgs e)
-    {
-        // Se o texto da busca for vazio, recarrega todos os produtos
-        if (string.IsNullOrWhiteSpace(e.NewTextValue))
-        {
-            await CarregarProdutos();
-        }
-    }
-
-    private async void OnBuscarClicked(object sender, EventArgs e)
-    {
-        await CarregarProdutos(txtBusca.Text);
-    }
-
-    private async void OnSomarClicked(object sender, EventArgs e)
+    private void txt_search_TextChanged(object sender, TextChangedEventArgs e)
     {
         try
         {
-            if (_produtos == null || !_produtos.Any())
-            {
-                await DisplayAlert("Informação", "Nenhum produto cadastrado.", "OK");
-                return;
-            }
+            string textoBusca = e.NewTextValue?.ToLower() ?? "";
 
-            decimal total = (decimal)_produtos.Sum(p => p.Quantidade * p.Preco);
-            await DisplayAlert("Total da Compra", $"O valor total dos produtos é: R$ {total:F2}", "OK");
+            var filtrados = _listaCompleta
+                .Where(p => p.Descricao != null && p.Descricao.ToLower().Contains(textoBusca))
+                .ToList();
+
+            _produtos.Clear();
+            foreach (var prod in filtrados)
+            {
+                _produtos.Add(prod);
+            }
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Erro", $"Erro ao calcular total: {ex.Message}", "OK");
+            DisplayAlert("Erro", ex.Message, "OK");
         }
     }
 
-    private async void OnAdicionarClicked(object sender, EventArgs e)
+    private void CalcularTotalGeral()
     {
-        await Navigation.PushAsync(new NovoProduto());
-    }
-
-    private async void OnItemTapped(object sender, ItemTappedEventArgs e)
-    {
-        if (e.Item is Produto produtoSelecionado)
+        try
         {
-            // Desmarca o item selecionado
-            ((ListView)sender).SelectedItem = null;
-
-            // Navega para a tela de edição
-            await Navigation.PushAsync(new EditarProduto(produtoSelecionado));
+            double totalGeral = 0;
+            foreach (var produto in _produtos)
+            {
+                totalGeral += produto.Total;
+            }
+            lblTotalGeral.Text = $"R$ {totalGeral:F2}";
+        }
+        catch (Exception ex)
+        {
+            DisplayAlert("Erro", $"Erro ao calcular total: {ex.Message}", "OK");
         }
     }
 
-    public async Task AtualizarLista()
+    private async void ToolbarItem_Adicionar_Clicked(object sender, EventArgs e)
     {
-        await CarregarProdutos();
+        try
+        {
+            await Navigation.PushAsync(new NovoProduto());
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("OPS", ex.Message, "OK");
+        }
+    }
+
+    private async void ToolbarItem_Somar_Clicked(object sender, EventArgs e)
+    {
+        try
+        {
+            if (_produtos.Count == 0)
+            {
+                await DisplayAlert("Atenção", "Não há produtos para somar.", "OK");
+                return;
+            }
+
+            double totalGeral = 0;
+            foreach (var produto in _produtos)
+            {
+                totalGeral += produto.Total;
+            }
+
+            await DisplayAlert("Total da Compra",
+                $"O valor total da sua compra é: R$ {totalGeral:F2}",
+                "OK");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Erro", ex.Message, "OK");
+        }
+    }
+
+    private async void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        try
+        {
+            if (e.CurrentSelection != null && e.CurrentSelection.Count > 0)
+            {
+                var produtoSelecionado = e.CurrentSelection[0] as Produto;
+                if (produtoSelecionado != null)
+                {
+                    // Abre a tela de edição passando o objeto selecionado
+                    await Navigation.PushAsync(new EditarProduto(produtoSelecionado));
+                }
+
+                // Desmarca o item selecionado para poder clicar novamente se necessário
+                ProdutosCollectionView.SelectedItem = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Erro", ex.Message, "OK");
+        }
     }
 }

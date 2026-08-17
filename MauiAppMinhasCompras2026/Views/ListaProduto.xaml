@@ -2,112 +2,183 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MauiAppMinhasCompras2026.Views.ListaProduto"
-             Title="Minhas Compras">
+             Title="Minhas Compras"
+             BackgroundColor="#1A1A1A">
 
-    <Grid Padding="10" RowSpacing="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Somar" Clicked="ToolbarItem_Somar_Clicked" />
+        <ToolbarItem Text="Adicionar" Clicked="ToolbarItem_Adicionar_Clicked" />
+    </ContentPage.ToolbarItems>
 
-        <!-- Título -->
-        <Label Text="Minhas Compras" 
-               FontSize="24" 
-               FontAttributes="Bold"
-               HorizontalOptions="Center"
-               Grid.Row="0"/>
+    <ScrollView>
+        <VerticalStackLayout Spacing="5" 
+                             Padding="20" 
+                             BackgroundColor="#1A1A1A">
 
-        <!-- Botões Somar e Adicionar -->
-        <Grid Grid.Row="1" ColumnSpacing="10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+            <!-- Linha Decorativa Topo -->
+            <BoxView HeightRequest="5" 
+                     Color="#3498DB" 
+                     Margin="0,0,0,15" />
 
-            <Button Text="Somar" 
-                    BackgroundColor="#4CAF50"
-                    TextColor="White"
-                    CornerRadius="8"
-                    HeightRequest="50"
-                    Grid.Column="0"
-                    Clicked="OnSomarClicked"/>
+            <!-- Campo de Busca -->
+            <SearchBar x:Name="txt_search"
+                       Placeholder="Busca de Produtos"
+                       PlaceholderColor="#888888"
+                       TextColor="#FFFFFF"
+                       BackgroundColor="#2C2C2C"
+                       Margin="0,0,0,15"
+                       TextChanged="txt_search_TextChanged" />
 
-            <Button Text="Adicionar" 
-                    BackgroundColor="#2196F3"
-                    TextColor="White"
-                    CornerRadius="8"
-                    HeightRequest="50"
-                    Grid.Column="1"
-                    Clicked="OnAdicionarClicked"/>
-        </Grid>
+            <Label Text="LISTA DE PRODUTOS" 
+                   FontSize="18" 
+                   FontAttributes="Bold" 
+                   TextColor="#FFFFFF" 
+                   Margin="0,0,0,15"
+                   HorizontalOptions="Center" />
 
-        <!-- Busca de produtos -->
-        <Grid Grid.Row="2" ColumnSpacing="5">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+            <!-- Container da Tabela -->
+            <Frame BackgroundColor="#2C2C2C" 
+                   CornerRadius="15" 
+                   Padding="0" 
+                   Margin="0,10,0,20"
+                   BorderColor="#3D3D3D"
+                   HasShadow="True">
 
-            <Entry x:Name="txtBusca" 
-                   Placeholder="Buscar produtos..."
-                   Grid.Column="0"
-                   TextChanged="OnBuscaTextChanged"/>
+                <VerticalStackLayout Spacing="0">
 
-            <Button Text="Buscar" 
-                    BackgroundColor="#FF9800"
-                    TextColor="White"
-                    CornerRadius="8"
-                    WidthRequest="80"
-                    HeightRequest="40"
-                    Grid.Column="1"
-                    Clicked="OnBuscarClicked"/>
-        </Grid>
+                    <!-- Cabeçalho da Tabela -->
+                    <Grid BackgroundColor="#3498DB" 
+                          Padding="15"
+                          ColumnDefinitions="*, *, *, *">
+                        <Label Grid.Column="0" 
+                               Text="Produto" 
+                               FontAttributes="Bold" 
+                               FontSize="14"
+                               TextColor="#FFFFFF" 
+                               Margin="0"
+                               HorizontalOptions="Center" />
+                        <Label Grid.Column="1" 
+                               Text="Qnt" 
+                               FontAttributes="Bold" 
+                               FontSize="14"
+                               TextColor="#FFFFFF" 
+                               Margin="0"
+                               HorizontalOptions="Center" />
+                        <Label Grid.Column="2" 
+                               Text="Preço" 
+                               FontAttributes="Bold" 
+                               FontSize="14"
+                               TextColor="#FFFFFF" 
+                               Margin="0"
+                               HorizontalOptions="Center" />
+                        <Label Grid.Column="3" 
+                               Text="Total" 
+                               FontAttributes="Bold" 
+                               FontSize="14"
+                               TextColor="#FFFFFF" 
+                               Margin="0"
+                               HorizontalOptions="Center" />
+                    </Grid>
 
-        <!-- Lista de produtos -->
-        <ListView x:Name="listViewProdutos" 
-                  Grid.Row="3"
-                  Margin="0,10,0,0"
-                  ItemTapped="OnItemTapped">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <ViewCell>
-                        <Grid Padding="10" ColumnSpacing="10">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
+                    <!-- Lista de Produtos -->
+                    <CollectionView x:Name="ProdutosCollectionView"
+                                    SelectionMode="Single"
+                                    SelectionChanged="OnSelectionChanged"
+                                    HeightRequest="350"
+                                    BackgroundColor="#2C2C2C">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Padding="12,10" 
+                                      Margin="0,1,0,1"
+                                      BackgroundColor="#222222"
+                                      ColumnDefinitions="*, *, *, *">
 
-                            <Label Text="{Binding Descricao}" 
-                                   FontAttributes="Bold"
-                                   Grid.Column="0"/>
+                                    <Label Grid.Column="0" 
+                                           Text="{Binding Descricao}"
+                                           FontAttributes="Bold"
+                                           FontSize="14"
+                                           TextColor="#FFFFFF"
+                                           Margin="0"
+                                           VerticalOptions="Center"
+                                           HorizontalOptions="Center" />
 
-                            <Label Text="{Binding Quantidade}" 
-                                   Grid.Column="1"/>
+                                    <Label Grid.Column="1" 
+                                           Text="{Binding Quantidade}"
+                                           FontSize="14"
+                                           TextColor="#E0E0E0"
+                                           Margin="0"
+                                           VerticalOptions="Center"
+                                           HorizontalOptions="Center" />
 
-                            <Label Text="{Binding Preco, StringFormat='R$ {0:F2}'}" 
-                                   Grid.Column="2"/>
+                                    <Label Grid.Column="2" 
+                                           Text="{Binding Preco, StringFormat='R$ {0:F2}'}"
+                                           FontSize="14"
+                                           TextColor="#E0E0E0"
+                                           Margin="0"
+                                           VerticalOptions="Center"
+                                           HorizontalOptions="Center" />
 
-                            <Label Text="{Binding Total, StringFormat='R$ {0:F2}'}" 
-                                   TextColor="#4CAF50"
-                                   FontAttributes="Bold"
-                                   Grid.Column="3"/>
-                        </Grid>
-                    </ViewCell>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+                                    <Label Grid.Column="3" 
+                                           Text="{Binding Total, StringFormat='R$ {0:F2}'}"
+                                           FontSize="14"
+                                           TextColor="#2ECC71"
+                                           FontAttributes="Bold"
+                                           Margin="0"
+                                           VerticalOptions="Center"
+                                           HorizontalOptions="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
 
-        <!-- Indicador de carregamento -->
-        <ActivityIndicator x:Name="activityIndicator" 
-                           IsRunning="False"
-                           IsVisible="False"
-                           Grid.Row="4"
-                           HorizontalOptions="Center"
-                           VerticalOptions="Center"/>
-    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Total Geral -->
+            <Frame BackgroundColor="#27AE60" 
+                   CornerRadius="15" 
+                   Padding="15" 
+                   Margin="0,0,0,20"
+                   BorderColor="#27AE60"
+                   HasShadow="True">
+                <Grid ColumnDefinitions="*, *">
+                    <Label Text="TOTAL DA COMPRA:" 
+                           FontAttributes="Bold" 
+                           FontSize="16" 
+                           TextColor="#FFFFFF"
+                           Margin="0"
+                           VerticalOptions="Center" />
+                    <Label Grid.Column="1" 
+                           x:Name="lblTotalGeral"
+                           Text="R$ 0,00"
+                           FontAttributes="Bold" 
+                           FontSize="18" 
+                           TextColor="#FFFFFF"
+                           Margin="0"
+                           HorizontalOptions="End"
+                           VerticalOptions="Center" />
+                </Grid>
+            </Frame>
+
+            <!-- Card Dica -->
+            <Frame BackgroundColor="#2C2C2C" 
+                   CornerRadius="10" 
+                   Padding="15"
+                   BorderColor="#3498DB"
+                   HasShadow="False">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="💡 Dica" 
+                           FontAttributes="Bold" 
+                           TextColor="#3498DB"
+                           Margin="0"
+                           FontSize="14" />
+                    <Label Text="Clique em um produto para editá-lo ou excluí-lo." 
+                           TextColor="#CCCCCC"
+                           Margin="0"
+                           FontSize="13" />
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

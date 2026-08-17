@@ -2,91 +2,99 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MauiAppMinhasCompras2026.Views.NovoProduto"
-             Title="Novo Produto">
+             Title="Novo Produto"
+             BackgroundColor="#1A1A1A">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Label">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="TextColor" Value="#FFFFFF" />
+                <Setter Property="Margin" Value="0,5,0,2" />
+            </Style>
+
+            <Style TargetType="Entry">
+                <Setter Property="BackgroundColor" Value="#222222" />
+                <Setter Property="TextColor" Value="#FFFFFF" />
+                <Setter Property="FontSize" Value="15" />
+                <Setter Property="HeightRequest" Value="45" />
+                <Setter Property="Margin" Value="0,0,0,10" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Salvar" 
+                     Priority="0" 
+                     Order="Primary" 
+                     Clicked="ToolbarItem_Clicked" />
+    </ContentPage.ToolbarItems>
 
     <ScrollView>
-        <Grid Padding="20" RowSpacing="15">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+        <VerticalStackLayout Spacing="5" 
+                             Padding="20" 
+                             BackgroundColor="#1A1A1A">
 
-            <!-- Título -->
-            <Label Text="Novo Produto" 
-                   FontSize="24" 
-                   FontAttributes="Bold"
-                   TextColor="#333333"
-                   Grid.Row="0"
-                   Margin="0,0,0,10"/>
+            <BoxView HeightRequest="5" 
+                     Color="#3498DB" 
+                     Margin="0,0,0,15" />
 
-            <!-- Campo Descrição -->
-            <Label Text="Descrição:" 
-                   FontSize="16" 
-                   FontAttributes="Bold"
-                   TextColor="#555555"
-                   Grid.Row="1"
-                   Margin="0,5,0,5"/>
-            <Entry x:Name="txtDescricao" 
-                   Placeholder="Digite a descrição do produto"
-                   BackgroundColor="#F5F5F5"
-                   FontSize="16"
-                   HeightRequest="50"
-                   Grid.Row="2"
-                   IsEnabled="True"
-                   Margin="0,0,0,10"/>
+            <Label Text="INFORMAÇÕES DO PRODUTO" 
+                   FontSize="18" 
+                   FontAttributes="Bold" 
+                   TextColor="#FFFFFF" 
+                   Margin="0,0,0,15"
+                   HorizontalOptions="Center" />
 
-            <!-- Campo Quantidade -->
-            <Label Text="Quantidade:" 
-                   FontSize="16" 
-                   FontAttributes="Bold"
-                   TextColor="#555555"
-                   Grid.Row="3"
-                   Margin="0,5,0,5"/>
-            <Entry x:Name="txtQuantidade" 
-                   Placeholder="Digite a quantidade"
-                   Keyboard="Numeric"
-                   BackgroundColor="#F5F5F5"
-                   FontSize="16"
-                   HeightRequest="50"
-                   Grid.Row="4"
-                   IsEnabled="True"
-                   Margin="0,0,0,10"/>
+            <Frame BackgroundColor="#2C2C2C" 
+                   CornerRadius="15" 
+                   Padding="20" 
+                   Margin="0,10,0,20"
+                   BorderColor="#3D3D3D"
+                   HasShadow="True">
 
-            <!-- Campo Preço -->
-            <Label Text="Preço:" 
-                   FontSize="16" 
-                   FontAttributes="Bold"
-                   TextColor="#555555"
-                   Grid.Row="5"
-                   Margin="0,5,0,5"/>
-            <Entry x:Name="txtPreco" 
-                   Placeholder="Digite o preço"
-                   Keyboard="Numeric"
-                   BackgroundColor="#F5F5F5"
-                   FontSize="16"
-                   HeightRequest="50"
-                   Grid.Row="6"
-                   IsEnabled="True"
-                   Margin="0,0,0,20"/>
+                <VerticalStackLayout Spacing="10">
 
-            <!-- Botão Salvar -->
-            <Button Text="Salvar" 
-                    BackgroundColor="#2196F3"
-                    TextColor="White"
-                    FontSize="18"
-                    FontAttributes="Bold"
-                    CornerRadius="10"
-                    HeightRequest="55"
-                    Grid.Row="7"
-                    Margin="0,10,0,0"
-                    Clicked="OnSalvarClicked"/>
-        </Grid>
+                    <Label Text="Descrição do Produto" />
+                    <Entry x:Name="txt_descricao" 
+                           Placeholder="Digite a descrição do produto"
+                           PlaceholderColor="#888888" />
+
+                    <Label Text="Quantidade" />
+                    <Entry x:Name="txt_quantidade" 
+                           Keyboard="Numeric"
+                           Placeholder="Digite a quantidade"
+                           PlaceholderColor="#888888" />
+
+                    <Label Text="Preço Unitário" />
+                    <Entry x:Name="txt_preco" 
+                           Keyboard="Numeric"
+                           Placeholder="Digite o preço unitário"
+                           PlaceholderColor="#888888" />
+
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame BackgroundColor="#2C2C2C" 
+                   CornerRadius="10" 
+                   Padding="15"
+                   BorderColor="#3498DB"
+                   HasShadow="False">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="💡 Dica" 
+                           FontAttributes="Bold" 
+                           TextColor="#3498DB"
+                           Margin="0"
+                           FontSize="14" />
+                    <Label Text="Preencha todos os campos corretamente antes de salvar." 
+                           FontAttributes="None"
+                           TextColor="#CCCCCC"
+                           Margin="0"
+                           FontSize="13" />
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

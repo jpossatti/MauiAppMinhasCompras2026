@@ -1,68 +1,80 @@
-using MauiAppMinhasCompras2026.Helpers;
 using MauiAppMinhasCompras2026.Models;
+using System.Globalization;
 
 namespace MauiAppMinhasCompras2026.Views;
 
 public partial class EditarProduto : ContentPage
 {
-    private readonly SQLiteDatabaseHelper _dbHelper;
     private Produto _produtoOriginal;
 
     public EditarProduto(Produto produto)
     {
         InitializeComponent();
 
-        string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "compras.db3");
-        _dbHelper = new SQLiteDatabaseHelper(dbPath);
-
         _produtoOriginal = produto;
 
         // Carrega os dados do produto nos campos
         txtDescricao.Text = produto.Descricao;
-        txtQuantidade.Text = produto.Quantidade.ToString();
-        txtPreco.Text = produto.Preco.ToString();
+        txtQuantidade.Text = produto.Quantidade.ToString(CultureInfo.InvariantCulture);
+        txtPreco.Text = produto.Preco.ToString(CultureInfo.InvariantCulture);
     }
 
     private async void OnSalvarClicked(object sender, EventArgs e)
     {
         try
         {
-            // Valida os campos
+            // Valida os campos vazios
             if (string.IsNullOrWhiteSpace(txtDescricao.Text))
             {
-                await DisplayAlert("Erro", "Por favor, informe a descrição do produto.", "OK");
+                await DisplayAlert("Atenção", "Por favor, informe a descrição do produto.", "OK");
+                txtDescricao.Focus();
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(txtQuantidade.Text))
             {
-                await DisplayAlert("Erro", "Por favor, informe a quantidade.", "OK");
+                await DisplayAlert("Atenção", "Por favor, informe a quantidade.", "OK");
+                txtQuantidade.Focus();
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(txtPreco.Text))
             {
-                await DisplayAlert("Erro", "Por favor, informe o preço.", "OK");
+                await DisplayAlert("Atenção", "Por favor, informe o preço.", "OK");
+                txtPreco.Focus();
                 return;
             }
 
-            // Atualiza os dados do produto
+            // Tratamento de ponto/vírgula decimal
+            string qteTexto = txtQuantidade.Text.Replace(',', '.');
+            string precoTexto = txtPreco.Text.Replace(',', '.');
+
+            if (!double.TryParse(qteTexto, NumberStyles.Any, CultureInfo.InvariantCulture, out double quantidade))
+            {
+                await DisplayAlert("Atenção", "Quantidade inválida. Digite apenas números.", "OK");
+                txtQuantidade.Focus();
+                return;
+            }
+
+            if (!double.TryParse(precoTexto, NumberStyles.Any, CultureInfo.InvariantCulture, out double preco))
+            {
+                await DisplayAlert("Atenção", "Preço inválido. Digite apenas números.", "OK");
+                txtPreco.Focus();
+                return;
+            }
+
+            // Atualiza o objeto original
             _produtoOriginal.Descricao = txtDescricao.Text.Trim();
-            _produtoOriginal.Quantidade = Convert.ToDouble(txtQuantidade.Text);
-            _produtoOriginal.Preco = Convert.ToDouble(txtPreco.Text);
+            _produtoOriginal.Quantidade = quantidade;
+            _produtoOriginal.Preco = preco;
 
-            // Salva no banco de dados (usando Update)
-            await _dbHelper.Update(_produtoOriginal);
+            // Executa o Update no Banco de Dados
+            await App.Db.Update(_produtoOriginal);
 
-            // Mensagem de sucesso
             await DisplayAlert("Sucesso", "Produto atualizado com sucesso!", "OK");
 
-            // Volta para a lista
+            // Retorna para a lista de produtos
             await Navigation.PopAsync();
-        }
-        catch (FormatException)
-        {
-            await DisplayAlert("Erro", "Por favor, insira valores numéricos válidos para quantidade e preço.", "OK");
         }
         catch (Exception ex)
         {
@@ -74,17 +86,14 @@ public partial class EditarProduto : ContentPage
     {
         try
         {
-            // Confirma a exclusão
             bool confirmacao = await DisplayAlert("Confirmar", $"Deseja realmente excluir o produto '{_produtoOriginal.Descricao}'?", "Sim", "Não");
 
             if (confirmacao)
             {
-                // Exclui o produto
-                await _dbHelper.Delete(_produtoOriginal.Id);
+                await App.Db.Delete(_produtoOriginal.Id);
 
                 await DisplayAlert("Sucesso", "Produto excluído com sucesso!", "OK");
 
-                // Volta para a lista
                 await Navigation.PopAsync();
             }
         }
